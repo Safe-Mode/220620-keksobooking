@@ -33,6 +33,9 @@
   };
 
   var advertsData = window.createData(INIT_DATA);
+  var map = document.querySelector('.map');
+
+  map.classList.remove('map--faded');
 
   var adverts = [];
 
