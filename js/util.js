@@ -21,7 +21,7 @@
 
     cutArray: function (arr) {
       var arrCopy = [].concat(arr);
-      arrCopy.length = this.getRandomInt(0, arrCopy.length - 1);
+      arrCopy.length = this.getRandomInt(0, arrCopy.length);
       return arrCopy;
     }
   };
