@@ -177,10 +177,17 @@
     var width = parseInt(getComputedStyle(pin).width, window.Util.RADIX_TEN);
     var height = parseInt(getComputedStyle(pin).height, window.Util.RADIX_TEN);
 
-    return {
-      x: leftPos + width / 2,
-      y: topPos + height / 2
-    };
+    if (mapEl.classList.contains('map--faded')) {
+      return {
+        x: leftPos + width / 2,
+        y: topPos + height / 2
+      };
+    } else {
+      return {
+        x: leftPos + width / 2,
+        y: topPos + height + MAIN_PIN_LINK_HEIGHT
+      };
+    }
   };
 
   var fillAdress = function () {
