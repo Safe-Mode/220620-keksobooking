@@ -3,6 +3,8 @@
 (function () {
   window.Util = {
     RADIX_TEN: 10,
+    ESC_KEYCODE: 27,
+    ENTER_KEYCODE: 13,
 
     getRandomInt: function (min, max) {
       var rand = min + Math.random() * (max + 1 - min);
@@ -29,6 +31,14 @@
 
     removeElement: function (el) {
       el.parentElement.removeChild(el);
+    },
+
+    isEscPressed: function (evt) {
+      return evt.keyCode === this.ESC_KEYCODE;
+    },
+
+    isEnterPressed: function (evt) {
+      return evt.keyCode === this.ENTER_KEYCODE;
     }
   };
 })();
