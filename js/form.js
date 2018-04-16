@@ -8,7 +8,6 @@
     palace: 10000
   };
 
-  var formEl = document.querySelector('.ad-form');
   var housingTypeEl = document.querySelector('#type');
   var housingPriceEl = document.querySelector('#price');
   var timeInEl = document.querySelector('#timein');
