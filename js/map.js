@@ -43,8 +43,6 @@
   var advertsData = window.createData(INIT_DATA);
   var mapEl = document.querySelector('.map');
 
-  mapEl.classList.remove('map--faded');
-
   var getPins = function (data) {
     var pins = [];
 
@@ -86,7 +84,7 @@
   var mapPinsEl = document.querySelector('.map__pins');
   var pins = getPins(advertsData);
 
-  appendElements(pins, pinTemplateEl, mapPinsEl, renderPin);
+  // appendElements(pins, pinTemplateEl, mapPinsEl, renderPin);
 
   var getAdverts = function (data) {
     var adverts = [];
@@ -162,6 +160,6 @@
   var fragment = document.createDocumentFragment();
   var filterContainerEl = document.querySelector('.map__filters-container');
 
-  fragment.appendChild(renderAdvert(adverts[0], advertTemplateEl));
-  mapEl.insertBefore(fragment, filterContainerEl);
+  // fragment.appendChild(renderAdvert(adverts[0], advertTemplateEl));
+  // mapEl.insertBefore(fragment, filterContainerEl);
 })();
