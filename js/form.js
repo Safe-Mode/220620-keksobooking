@@ -1,47 +1,67 @@
 'use strict';
 
 (function () {
-  var formEl = document.querySelector('.ad-form');
-  var formFieldsEl = formEl.querySelectorAll('fieldset');
-  var mainPinEl = document.querySelector('.map__pin--main');
-  var addressInputEl = formEl.querySelector('#address');
+  var MIN_PRICES = {
+    bungalo: 0,
+    flat: 1000,
+    house: 5000,
+    palace: 10000
+  };
 
-  var activateForm = function () {
-    if (formEl.classList.contains('ad-form--disabled')) {
-      formEl.classList.remove('ad-form--disabled');
+  var housingTypeEl = document.querySelector('#type');
+  var housingPriceEl = document.querySelector('#price');
+  var timeInEl = document.querySelector('#timein');
+  var timeOutEl = document.querySelector('#timeout');
+  var roomNumEl = document.querySelector('#room_number');
+  var capacityEl = document.querySelector('#capacity');
+  var capacityListEl = capacityEl.children;
+
+  var onTimeInChange = function () {
+    timeOutEl.value = timeInEl.value;
+  };
+
+  housingPriceEl.min = MIN_PRICES[housingTypeEl.value];
+  housingPriceEl.placeholder = MIN_PRICES[housingTypeEl.value];
+
+  timeInEl.addEventListener('change', onTimeInChange);
+
+  var setActiveOptions = function () {
+    if (roomNumEl.value !== '100') {
+      window.Util.forEach(capacityListEl, function (item) {
+        item.disabled = (roomNumEl.value >= item.value) ? false : true;
+      });
+
+      window.Util.forEach(capacityListEl, function (item) {
+        if (item.value === '0') {
+          item.disabled = true;
+        }
+      });
+    } else {
+      window.Util.forEach(capacityListEl, function (item) {
+        if (item.value === '0') {
+          item.disabled = false;
+        } else {
+          item.disabled = true;
+        }
+      });
     }
+  };
 
-    formFieldsEl.forEach(function (field) {
-      field.disabled = false;
+  var setSelectedOption = function () {
+    window.Util.forEach(capacityListEl, function (item) {
+      item.selected = (item.disabled) ? false : true;
     });
   };
 
-  var getPinCoords = function (pin) {
-    var leftPos = parseInt(pin.style.left, 10);
-    var topPos = parseInt(pin.style.top, 10);
-    var width = parseInt(getComputedStyle(pin).width, 10);
-    var height = parseInt(getComputedStyle(pin).height, 10);
-
-    return {
-      x: leftPos + width / 2,
-      y: topPos + height / 2
-    };
+  var setOptionsState = function () {
+    setActiveOptions();
+    setSelectedOption();
   };
 
-  var fillAdress = function () {
-    addressInputEl.value = getPinCoords(mainPinEl).x + ', ' + getPinCoords(mainPinEl).y;
+  var onRoomNumChange = function () {
+    setOptionsState();
   };
 
-  formFieldsEl.forEach(function (field) {
-    field.disabled = true;
-  });
-
-  fillAdress();
-
-  var onMainPinMouseUp = function () {
-    activateForm();
-    fillAdress();
-  };
-
-  mainPinEl.addEventListener('mouseup', onMainPinMouseUp);
+  setOptionsState();
+  roomNumEl.addEventListener('change', onRoomNumChange);
 })();
