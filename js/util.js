@@ -2,6 +2,8 @@
 
 (function () {
   window.Util = {
+    RADIX_TEN: 10,
+
     getRandomInt: function (min, max) {
       var rand = min + Math.random() * (max + 1 - min);
       rand = Math.floor(rand);
@@ -23,6 +25,10 @@
       var arrCopy = [].concat(arr);
       arrCopy.length = this.getRandomInt(0, arrCopy.length);
       return arrCopy;
+    },
+
+    removeElement: function (el) {
+      el.parentElement.removeChild(el);
     }
   };
 })();

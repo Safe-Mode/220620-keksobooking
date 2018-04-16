@@ -39,6 +39,7 @@
     'house': 'Дом',
     'palace': 'Дворец'
   };
+  var MAIN_PIN_LINK_HEIGHT = 22;
 
   var advertsData = window.createData(INIT_DATA);
   var mapEl = document.querySelector('.map');
@@ -81,10 +82,8 @@
   var pinTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__pin');
-  var mapPinsEl = document.querySelector('.map__pins');
+  var pinsContainerEl = document.querySelector('.map__pins');
   var pins = getPins(advertsData);
-
-  // appendElements(pins, pinTemplateEl, mapPinsEl, renderPin);
 
   var getAdverts = function (data) {
     var adverts = [];
@@ -156,10 +155,70 @@
   var advertTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__card');
-
-  var fragment = document.createDocumentFragment();
   var filterContainerEl = document.querySelector('.map__filters-container');
+  var formEl = document.querySelector('.ad-form');
+  var formFieldsEl = formEl.querySelectorAll('fieldset');
+  var mainPinEl = document.querySelector('.map__pin--main');
+  var addressInputEl = formEl.querySelector('#address');
 
-  // fragment.appendChild(renderAdvert(adverts[0], advertTemplateEl));
-  // mapEl.insertBefore(fragment, filterContainerEl);
+  var activateForm = function () {
+    if (formEl.classList.contains('ad-form--disabled')) {
+      formEl.classList.remove('ad-form--disabled');
+    }
+
+    formFieldsEl.forEach(function (field) {
+      field.disabled = false;
+    });
+  };
+
+  var getPinCoords = function (pin) {
+    var leftPos = parseInt(pin.style.left, window.Util.RADIX_TEN);
+    var topPos = parseInt(pin.style.top, window.Util.RADIX_TEN);
+    var width = parseInt(getComputedStyle(pin).width, window.Util.RADIX_TEN);
+    var height = parseInt(getComputedStyle(pin).height, window.Util.RADIX_TEN);
+
+    return {
+      x: leftPos + width / 2,
+      y: topPos + height / 2
+    };
+  };
+
+  var fillAdress = function () {
+    addressInputEl.value = getPinCoords(mainPinEl).x + ', ' + getPinCoords(mainPinEl).y;
+  };
+
+  var activateMap = function () {
+    mapEl.classList.remove('map--faded');
+    appendElements(pins, pinTemplateEl, pinsContainerEl, renderPin);
+  };
+
+  var onMainPinMouseUp = function () {
+    activateMap();
+    activateForm();
+    fillAdress();
+  };
+
+  var onMapPinClick = function (evt) {
+    if (mapEl.querySelector('.map__card')) {
+      window.Util.removeElement(mapEl.querySelector('.map__card'));
+    }
+
+    if (evt.target.parentElement.classList.contains('map__pin') && !evt.target.parentElement.classList.contains('map__pin--main')) {
+      var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+      mapPinsEl.forEach(function (pin, i) {
+        if (pin === evt.target.parentElement) {
+          mapEl.insertBefore(renderAdvert(adverts[i], advertTemplateEl), filterContainerEl);
+        }
+      });
+    }
+  };
+
+  formFieldsEl.forEach(function (field) {
+    field.disabled = true;
+  });
+
+  fillAdress();
+  mainPinEl.addEventListener('mouseup', onMainPinMouseUp);
+  pinsContainerEl.addEventListener('click', onMapPinClick);
 })();
