@@ -39,11 +39,10 @@
     'house': 'Дом',
     'palace': 'Дворец'
   };
+  var MAIN_PIN_LINK_HEIGHT = 22;
 
   var advertsData = window.createData(INIT_DATA);
   var mapEl = document.querySelector('.map');
-
-  mapEl.classList.remove('map--faded');
 
   var getPins = function (data) {
     var pins = [];
@@ -83,10 +82,8 @@
   var pinTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__pin');
-  var mapPinsEl = document.querySelector('.map__pins');
+  var pinsContainerEl = document.querySelector('.map__pins');
   var pins = getPins(advertsData);
-
-  appendElements(pins, pinTemplateEl, mapPinsEl, renderPin);
 
   var getAdverts = function (data) {
     var adverts = [];
@@ -158,10 +155,112 @@
   var advertTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__card');
-
-  var fragment = document.createDocumentFragment();
   var filterContainerEl = document.querySelector('.map__filters-container');
+  var formEl = document.querySelector('.ad-form');
+  var formFieldsEl = formEl.querySelectorAll('fieldset');
+  var mainPinEl = document.querySelector('.map__pin--main');
+  var addressInputEl = formEl.querySelector('#address');
 
-  fragment.appendChild(renderAdvert(adverts[0], advertTemplateEl));
-  mapEl.insertBefore(fragment, filterContainerEl);
+  var activateForm = function () {
+    if (formEl.classList.contains('ad-form--disabled')) {
+      formEl.classList.remove('ad-form--disabled');
+    }
+
+    formFieldsEl.forEach(function (field) {
+      field.disabled = false;
+    });
+  };
+
+  var getPinCoords = function (pin) {
+    var leftPos = parseInt(pin.style.left, window.Util.RADIX_TEN);
+    var topPos = parseInt(pin.style.top, window.Util.RADIX_TEN);
+    var width = parseInt(getComputedStyle(pin).width, window.Util.RADIX_TEN);
+    var height = parseInt(getComputedStyle(pin).height, window.Util.RADIX_TEN);
+
+    if (mapEl.classList.contains('map--faded')) {
+      return {
+        x: leftPos + width / 2,
+        y: topPos + height / 2
+      };
+    } else {
+      return {
+        x: leftPos + width / 2,
+        y: topPos + height + MAIN_PIN_LINK_HEIGHT
+      };
+    }
+  };
+
+  var fillAdress = function () {
+    addressInputEl.value = getPinCoords(mainPinEl).x + ', ' + getPinCoords(mainPinEl).y;
+  };
+
+  var activateMap = function () {
+    mapEl.classList.remove('map--faded');
+    appendElements(pins, pinTemplateEl, pinsContainerEl, renderPin);
+  };
+
+  var onMainPinMouseUp = function () {
+    activateMap();
+    activateForm();
+    fillAdress();
+  };
+
+  var removeCard = function (card) {
+    if (card) {
+      window.Util.removeElement(card);
+    }
+  };
+
+  var showAdvertCard = function (evtPin) {
+    var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+    mapPinsEl.forEach(function (pin, i) {
+      if (pin === evtPin) {
+        mapEl.insertBefore(renderAdvert(adverts[i], advertTemplateEl), filterContainerEl);
+      }
+    });
+  };
+
+  var toggleModal = function (modal) {
+    modal.classList.toggle('hidden');
+  };
+
+  var onMapPinClick = function (evt) {
+    if (evt.target.parentElement.classList.contains('map__pin') && !evt.target.parentElement.classList.contains('map__pin--main')) {
+      var advertCardEl = mapEl.querySelector('.map__card');
+
+      removeCard(advertCardEl);
+      showAdvertCard(evt.target.parentElement);
+
+      advertCardEl = mapEl.querySelector('.map__card');
+      var popupCloseEl = mapEl.querySelector('.popup__close');
+
+      var onCardEscPress = function (escEvt) {
+        escEvt.preventDefault();
+
+        if (window.Util.isEscPressed(escEvt)) {
+          toggleModal(advertCardEl);
+          document.removeEventListener('keydown', onCardEscPress);
+        }
+      };
+
+      var onPopupCloseClick = function (closeEvt) {
+        closeEvt.preventDefault();
+
+        removeCard(advertCardEl);
+        document.removeEventListener('keydown', onCardEscPress);
+      };
+
+      popupCloseEl.addEventListener('click', onPopupCloseClick);
+      document.addEventListener('keydown', onCardEscPress);
+    }
+  };
+
+  formFieldsEl.forEach(function (field) {
+    field.disabled = true;
+  });
+
+  fillAdress();
+  mainPinEl.addEventListener('mouseup', onMainPinMouseUp);
+  pinsContainerEl.addEventListener('click', onMapPinClick);
 })();
