@@ -39,6 +39,10 @@
 
     isEnterPressed: function (evt) {
       return evt.keyCode === this.ENTER_KEYCODE;
+    },
+
+    forEach: function (collection, cb) {
+      [].forEach.call(collection, cb);
     }
   };
 })();
