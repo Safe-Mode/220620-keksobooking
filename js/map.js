@@ -221,8 +221,20 @@
         y: moveEvt.clientY
       };
 
-      target.style.left = target.offsetLeft - shift.x + STYLE_DIMENSION;
-      target.style.top = target.offsetTop - shift.y + STYLE_DIMENSION;
+      var leftPos = target.offsetLeft - shift.x;
+      var topPos = target.offsetTop - shift.y;
+      var rightEdge = mapEl.offsetWidth;
+      var bottomEdge = pinsContainerEl.offsetHeight;
+      var pinWidth = mainPinEl.offsetWidth;
+      var pinHeight = mainPinEl.offsetHeight;
+
+      leftPos = (leftPos < 0) ? 0 : leftPos;
+      leftPos = (leftPos + pinWidth > rightEdge) ? rightEdge - pinWidth : leftPos;
+      topPos = (topPos < 0) ? 0 : topPos;
+      topPos = (topPos + pinHeight > bottomEdge) ? bottomEdge - pinHeight : topPos;
+
+      target.style.left = leftPos + STYLE_DIMENSION;
+      target.style.top = topPos + STYLE_DIMENSION;
       fillAdress();
     };
 
@@ -231,12 +243,12 @@
       activateForm();
       fillAdress();
 
-      document.removeEventListener('mousemove', onMainPinMouseMove);
-      document.removeEventListener('mouseup', onMainPinMouseUp);
+      mapEl.removeEventListener('mousemove', onMainPinMouseMove);
+      mapEl.removeEventListener('mouseup', onMainPinMouseUp);
     };
 
-    document.addEventListener('mousemove', onMainPinMouseMove);
-    document.addEventListener('mouseup', onMainPinMouseUp);
+    mapEl.addEventListener('mousemove', onMainPinMouseMove);
+    mapEl.addEventListener('mouseup', onMainPinMouseUp);
   };
 
   var removeCard = function (card) {
