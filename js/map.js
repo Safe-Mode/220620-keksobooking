@@ -33,6 +33,7 @@
   };
 
   var PRICE_DIMENSION = '₽/ночь';
+  var STYLE_DIMENSION = 'px';
   var TYPES = {
     'flat': 'Квартира',
     'bungalo': 'Бунгало',
@@ -199,10 +200,55 @@
     appendElements(pins, pinTemplateEl, pinsContainerEl, renderPin);
   };
 
-  var onMainPinMouseUp = function () {
-    activateMap();
-    activateForm();
-    fillAdress();
+  var onMainPinMouseDown = function (evt) {
+    evt.preventDefault();
+
+    var target = evt.currentTarget;
+
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    var onMainPinMouseMove = function (moveEvt) {
+      var shift = {
+        x: startCoords.x - moveEvt.clientX,
+        y: startCoords.y - moveEvt.clientY
+      };
+
+      startCoords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+
+      var leftPos = target.offsetLeft - shift.x;
+      var topPos = target.offsetTop - shift.y;
+      var rightEdge = mapEl.offsetWidth;
+      var bottomEdge = pinsContainerEl.offsetHeight;
+      var pinWidth = mainPinEl.offsetWidth;
+      var pinHeight = mainPinEl.offsetHeight;
+
+      leftPos = (leftPos < 0) ? 0 : leftPos;
+      leftPos = (leftPos + pinWidth > rightEdge) ? rightEdge - pinWidth : leftPos;
+      topPos = (topPos < 0) ? 0 : topPos;
+      topPos = (topPos + pinHeight > bottomEdge) ? bottomEdge - pinHeight : topPos;
+
+      target.style.left = leftPos + STYLE_DIMENSION;
+      target.style.top = topPos + STYLE_DIMENSION;
+      fillAdress();
+    };
+
+    var onMainPinMouseUp = function () {
+      activateMap();
+      activateForm();
+      fillAdress();
+
+      mapEl.removeEventListener('mousemove', onMainPinMouseMove);
+      mapEl.removeEventListener('mouseup', onMainPinMouseUp);
+    };
+
+    mapEl.addEventListener('mousemove', onMainPinMouseMove);
+    mapEl.addEventListener('mouseup', onMainPinMouseUp);
   };
 
   var removeCard = function (card) {
@@ -261,6 +307,7 @@
   });
 
   fillAdress();
-  mainPinEl.addEventListener('mouseup', onMainPinMouseUp);
+  mainPinEl.style.zIndex = 10;
+  mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
   pinsContainerEl.addEventListener('click', onMapPinClick);
 })();
