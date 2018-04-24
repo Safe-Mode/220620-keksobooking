@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  window.Advert = function (data) {
+  window.Card = function (data) {
     this.author = {
       avatar: data.author.avatar
     };

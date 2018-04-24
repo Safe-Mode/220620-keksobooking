@@ -70,14 +70,14 @@
     return pinEl;
   };
 
-  var appendElements = function (data, template, container, renderFunc) {
+  var appendElements = function (settings) {
     var fragment = document.createDocumentFragment();
 
-    data.forEach(function (item) {
-      fragment.appendChild(renderFunc(item, template));
+    settings.data.forEach(function (item) {
+      fragment.appendChild(settings.renderFunc(item, settings.template));
     });
 
-    container.appendChild(fragment);
+    settings.container.appendChild(fragment);
   };
 
   var pinTemplateEl = document.querySelector('template')
@@ -90,7 +90,7 @@
     var adverts = [];
 
     data.forEach(function (item) {
-      var advert = new window.Advert(item);
+      var advert = new window.Card(item);
       adverts.push(advert);
     });
 
@@ -196,8 +196,15 @@
   };
 
   var activateMap = function () {
-    mapEl.classList.remove('map--faded');
-    appendElements(pins, pinTemplateEl, pinsContainerEl, renderPin);
+    if (mapEl.classList.contains('map--faded')) {
+      mapEl.classList.remove('map--faded');
+      appendElements({
+        data: pins,
+        template: pinTemplateEl,
+        container: pinsContainerEl,
+        renderFunc: renderPin
+      });
+    }
   };
 
   var onMainPinMouseDown = function (evt) {
@@ -244,11 +251,11 @@
       fillAdress();
 
       mapEl.removeEventListener('mousemove', onMainPinMouseMove);
-      mapEl.removeEventListener('mouseup', onMainPinMouseUp);
+      document.removeEventListener('mouseup', onMainPinMouseUp);
     };
 
     mapEl.addEventListener('mousemove', onMainPinMouseMove);
-    mapEl.addEventListener('mouseup', onMainPinMouseUp);
+    document.addEventListener('mouseup', onMainPinMouseUp);
   };
 
   var removeCard = function (card) {
