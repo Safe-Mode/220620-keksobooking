@@ -1,37 +1,39 @@
 'use strict';
 
 (function () {
-  var INIT_DATA = {
-    advertsLength: 8,
-    indexLength: 2,
-    imagePath: 'img/avatars/user',
-    extension: '.png',
-    offerTitles: [
-      'Большая уютная квартира',
-      'Маленькая неуютная квартира',
-      'Огромный прекрасный дворец',
-      'Маленький ужасный дворец',
-      'Красивый гостевой домик',
-      'Некрасивый негостеприимный домик',
-      'Уютное бунгало далеко от моря',
-      'Неуютное бунгало по колено в воде'
-    ],
-    types: ['palace', 'flat', 'house', 'bungalo'],
-    minPrice: 1000,
-    maxPrice: 1000000,
-    minRooms: 1,
-    maxRooms: 5,
-    checks: ['12:00', '13:00', '14:00'],
-    features: ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'],
-    maxCoordX: 900,
-    minCoordX: 300,
-    maxCoordY: 500,
-    minCoordY: 150,
-    photos: [
-      'http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
-    ]
-  };
+  // var INIT_DATA = {
+  //   advertsLength: 8,
+  //   indexLength: 2,
+  //   imagePath: 'img/avatars/user',
+  //   extension: '.png',
+  //   offerTitles: [
+  //     'Большая уютная квартира',
+  //     'Маленькая неуютная квартира',
+  //     'Огромный прекрасный дворец',
+  //     'Маленький ужасный дворец',
+  //     'Красивый гостевой домик',
+  //     'Некрасивый негостеприимный домик',
+  //     'Уютное бунгало далеко от моря',
+  //     'Неуютное бунгало по колено в воде'
+  //   ],
+  //   types: ['palace', 'flat', 'house', 'bungalo'],
+  //   minPrice: 1000,
+  //   maxPrice: 1000000,
+  //   minRooms: 1,
+  //   maxRooms: 5,
+  //   checks: ['12:00', '13:00', '14:00'],
+  //   features: ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'],
+  //   maxCoordX: 900,
+  //   minCoordX: 300,
+  //   maxCoordY: 500,
+  //   minCoordY: 150,
+  //   photos: [
+  //     'http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+  //   ]
+  // };
 
+  var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
+  var LOAD_URL = ENDPOINT_URL + '/data';
   var PRICE_DIMENSION = '₽/ночь';
   var TYPES = {
     'flat': 'Квартира',
@@ -40,8 +42,8 @@
     'palace': 'Дворец'
   };
   var MAIN_PIN_LINK_HEIGHT = 22;
+  var MESSAGE_TIMEOUT = 5000;
 
-  var advertsData = window.createData(INIT_DATA);
   var mapEl = document.querySelector('.map');
 
   var getPins = function (data) {
@@ -83,7 +85,7 @@
       .content
       .querySelector('.map__pin');
   var pinsContainerEl = document.querySelector('.map__pins');
-  var pins = getPins(advertsData);
+  var pins = null;
 
   var getAdverts = function (data) {
     var adverts = [];
@@ -151,7 +153,7 @@
     return advertEl;
   };
 
-  var adverts = getAdverts(advertsData);
+  var adverts = null;
   var advertTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__card');
@@ -194,21 +196,26 @@
     addressInputEl.value = getPinCoords(mainPinEl).x + ', ' + getPinCoords(mainPinEl).y;
   };
 
-  var activateMap = function () {
+  var activateMap = function (options) {
     if (mapEl.classList.contains('map--faded')) {
       mapEl.classList.remove('map--faded');
       appendElements({
-        data: pins,
-        template: pinTemplateEl,
-        container: pinsContainerEl,
-        renderFunc: renderPin
+        data: options.pins,
+        template: options.template,
+        container: options.container,
+        renderFunc: options.renderFunc
       });
     }
   };
 
   var onMainPinMouseDown = function () {
     var onMainPinMouseUp = function () {
-      activateMap();
+      activateMap({
+        pins: pins,
+        template: pinTemplateEl,
+        container: pinsContainerEl,
+        renderFunc: renderPin
+      });
       activateForm();
       mainPinEl.removeEventListener('mouseup', onMainPinMouseUp);
       document.addEventListener('mouseup', onMainPinMouseUp);
@@ -272,9 +279,56 @@
     field.disabled = true;
   });
 
+  var showStatusMessage = function (errorMessage, showTime) {
+    var node = document.createElement('div');
+
+    node.id = 'error';
+    node.style.position = 'absolute';
+    node.style.zIndex = '100';
+    node.style.left = 0;
+    node.style.right = 0;
+    node.style.margin = '0 auto';
+    node.style.padding = '5px';
+    node.style.fontSize = '24px';
+    node.style.color = 'white';
+    node.style.textAlign = 'center';
+    node.style.backgroundColor = 'red';
+    node.textContent = errorMessage;
+
+    var prevError = document.querySelector('#error');
+
+    if (prevError) {
+      window.Util.removeElement(prevError);
+    }
+
+    document.body.insertAdjacentElement('afterbegin', node);
+
+    if (showTime) {
+      var timeout = setTimeout(function () {
+        window.Util.removeElement(node);
+        clearTimeout(timeout);
+      }, showTime);
+    }
+  };
+
+  var onXHRSuccess = function (data) {
+    pins = getPins(data);
+    adverts = getAdverts(data);
+
+    mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
+    pinsContainerEl.addEventListener('click', onMapPinClick);
+  };
+
+  var onXHRError = function (errorMessage) {
+    showStatusMessage(errorMessage, MESSAGE_TIMEOUT);
+  };
+
+  window.backend.load({
+    url: LOAD_URL,
+    onLoad: onXHRSuccess,
+    onError: onXHRError
+  });
+
   fillAdress();
-  mainPinEl.style.zIndex = 10;
-  mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
   window.drag(mainPinEl, pinsContainerEl, fillAdress);
-  pinsContainerEl.addEventListener('click', onMapPinClick);
 })();
