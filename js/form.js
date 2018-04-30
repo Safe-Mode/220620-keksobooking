@@ -8,12 +8,14 @@
     palace: 10000
   };
 
-  var housingTypeEl = document.querySelector('#type');
-  var housingPriceEl = document.querySelector('#price');
-  var timeInEl = document.querySelector('#timein');
-  var timeOutEl = document.querySelector('#timeout');
-  var roomNumEl = document.querySelector('#room_number');
-  var capacityEl = document.querySelector('#capacity');
+  var formEl = document.querySelector('.ad-form');
+  var formResetEl = formEl.querySelector('.ad-form__reset');
+  var housingTypeEl = formEl.querySelector('#type');
+  var housingPriceEl = formEl.querySelector('#price');
+  var timeInEl = formEl.querySelector('#timein');
+  var timeOutEl = formEl.querySelector('#timeout');
+  var roomNumEl = formEl.querySelector('#room_number');
+  var capacityEl = formEl.querySelector('#capacity');
   var capacityListEl = capacityEl.children;
 
   var setPriceToType = function () {
@@ -56,7 +58,7 @@
 
   var setSelectedOption = function () {
     window.util.forEach(capacityListEl, function (item) {
-      item.selected = (item.disabled) ? false : true;
+      item.defaultSelected = (item.disabled) ? false : true;
     });
   };
 
@@ -72,4 +74,14 @@
   setOptionsState();
   housingTypeEl.addEventListener('change', onTypeChange);
   roomNumEl.addEventListener('change', onRoomNumChange);
+
+  formEl.addEventListener('submit', function (evt) {
+    setOptionsState();
+    evt.preventDefault();
+  });
+
+  formResetEl.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    setOptionsState();
+  });
 })();
