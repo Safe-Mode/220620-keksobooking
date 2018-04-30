@@ -379,8 +379,6 @@
       onError: onXHRError
     });
 
-    console.log(1);
-
     evt.preventDefault();
   });
 
