@@ -33,7 +33,6 @@
   // };
 
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
-  var LOAD_URL = ENDPOINT_URL + '/data';
   var PRICE_DIMENSION = '₽/ночь';
   var TYPES = {
     'flat': 'Квартира',
@@ -44,6 +43,7 @@
   var MAIN_PIN_LINK_HEIGHT = 22;
   var MESSAGE_TIMEOUT = 5000;
 
+  var loadURL = ENDPOINT_URL + '/data';
   var mapEl = document.querySelector('.map');
 
   var getPins = function (data) {
@@ -162,6 +162,15 @@
   var formFieldsEl = formEl.querySelectorAll('fieldset');
   var mainPinEl = document.querySelector('.map__pin--main');
   var addressInputEl = formEl.querySelector('#address');
+  var mainPinInitCoord = {
+    x: mainPinEl.style.left,
+    y: mainPinEl.style.top
+  };
+
+  var setInitCoords = function (el, coords) {
+    el.style.left = coords.x;
+    el.style.top = coords.y;
+  };
 
   var activateForm = function () {
     if (formEl.classList.contains('ad-form--disabled')) {
@@ -174,10 +183,10 @@
   };
 
   var getPinCoords = function (pin) {
-    var leftPos = parseInt(pin.style.left, window.Util.RADIX_TEN);
-    var topPos = parseInt(pin.style.top, window.Util.RADIX_TEN);
-    var width = parseInt(getComputedStyle(pin).width, window.Util.RADIX_TEN);
-    var height = parseInt(getComputedStyle(pin).height, window.Util.RADIX_TEN);
+    var leftPos = parseInt(pin.style.left, window.util.RADIX_TEN);
+    var topPos = parseInt(pin.style.top, window.util.RADIX_TEN);
+    var width = parseInt(getComputedStyle(pin).width, window.util.RADIX_TEN);
+    var height = parseInt(getComputedStyle(pin).height, window.util.RADIX_TEN);
 
     if (mapEl.classList.contains('map--faded')) {
       return {
@@ -226,7 +235,7 @@
 
   var removeCard = function (card) {
     if (card) {
-      window.Util.removeElement(card);
+      window.util.removeElement(card);
     }
   };
 
@@ -257,7 +266,7 @@
       var onCardEscPress = function (escEvt) {
         escEvt.preventDefault();
 
-        if (window.Util.isEscPressed(escEvt)) {
+        if (window.util.isEscPressed(escEvt)) {
           toggleModal(advertCardEl);
           document.removeEventListener('keydown', onCardEscPress);
         }
@@ -279,36 +288,62 @@
     field.disabled = true;
   });
 
-  var showStatusMessage = function (errorMessage, showTime) {
-    var node = document.createElement('div');
+  var setMessageTimeout = function (messageEl, timeout) {
+    if (timeout) {
+      var timeoutID = setTimeout(function () {
+        window.util.removeElement(messageEl);
+        clearTimeout(timeoutID);
+      }, timeout);
+    }
+  };
 
-    node.id = 'error';
-    node.style.position = 'absolute';
-    node.style.zIndex = '100';
-    node.style.left = 0;
-    node.style.right = 0;
-    node.style.margin = '0 auto';
-    node.style.padding = '5px';
-    node.style.fontSize = '24px';
-    node.style.color = 'white';
-    node.style.textAlign = 'center';
-    node.style.backgroundColor = 'red';
-    node.textContent = errorMessage;
+  var showErrorMessage = function (error, showTime) {
+    var messageNode = document.createElement('div');
+
+    messageNode.id = 'error';
+    messageNode.style.position = 'absolute';
+    messageNode.style.zIndex = '100';
+    messageNode.style.left = 0;
+    messageNode.style.right = 0;
+    messageNode.style.margin = '0 auto';
+    messageNode.style.padding = '5px';
+    messageNode.style.fontSize = '24px';
+    messageNode.style.color = 'white';
+    messageNode.style.textAlign = 'center';
+    messageNode.style.backgroundColor = 'red';
+    messageNode.textContent = error;
 
     var prevError = document.querySelector('#error');
 
     if (prevError) {
-      window.Util.removeElement(prevError);
+      window.util.removeElement(prevError);
     }
 
-    document.body.insertAdjacentElement('afterbegin', node);
+    document.body.insertAdjacentElement('afterbegin', messageNode);
+    setMessageTimeout(messageNode, showTime);
+  };
 
-    if (showTime) {
-      var timeout = setTimeout(function () {
-        window.Util.removeElement(node);
-        clearTimeout(timeout);
-      }, showTime);
-    }
+  var showSubmitMessage = function (messageNode, timeout) {
+    var hideSubmitMessage = function () {
+      toggleModal(messageNode);
+      clearTimeout(timeoutID);
+      document.removeEventListener('keydown', onSubmitMessageEscPress);
+    };
+
+    var onSubmitMessageEscPress = function (evt) {
+      evt.preventDefault();
+
+      if (window.util.isEscPressed(evt)) {
+        hideSubmitMessage();
+      }
+    };
+
+    toggleModal(messageNode);
+    document.addEventListener('keydown', onSubmitMessageEscPress);
+
+    var timeoutID = setTimeout(function () {
+      hideSubmitMessage();
+    }, timeout);
   };
 
   var onXHRSuccess = function (data) {
@@ -320,15 +355,35 @@
   };
 
   var onXHRError = function (errorMessage) {
-    showStatusMessage(errorMessage, MESSAGE_TIMEOUT);
+    showErrorMessage(errorMessage, MESSAGE_TIMEOUT);
   };
 
   window.backend.load({
-    url: LOAD_URL,
+    url: loadURL,
     onLoad: onXHRSuccess,
     onError: onXHRError
   });
 
   fillAdress();
   window.drag(mainPinEl, pinsContainerEl, fillAdress);
+
+  var successModalEl = document.querySelector('.success');
+
+  formEl.addEventListener('submit', function (evt) {
+    var onSubmitSuccess = function () {
+      showSubmitMessage(successModalEl, MESSAGE_TIMEOUT);
+      evt.target.reset();
+      setInitCoords(mainPinEl, mainPinInitCoord);
+      fillAdress();
+    };
+
+    window.backend.save({
+      url: ENDPOINT_URL,
+      data: new FormData(evt.currentTarget),
+      onLoad: onSubmitSuccess,
+      onError: onXHRError
+    });
+
+    evt.preventDefault();
+  });
 })();

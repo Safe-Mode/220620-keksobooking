@@ -27,17 +27,17 @@
 
   var setActiveOptions = function () {
     if (roomNumEl.value !== '100') {
-      window.Util.forEach(capacityListEl, function (item) {
+      window.util.forEach(capacityListEl, function (item) {
         item.disabled = (roomNumEl.value >= item.value) ? false : true;
       });
 
-      window.Util.forEach(capacityListEl, function (item) {
+      window.util.forEach(capacityListEl, function (item) {
         if (item.value === '0') {
           item.disabled = true;
         }
       });
     } else {
-      window.Util.forEach(capacityListEl, function (item) {
+      window.util.forEach(capacityListEl, function (item) {
         if (item.value === '0') {
           item.disabled = false;
         } else {
@@ -48,7 +48,7 @@
   };
 
   var setSelectedOption = function () {
-    window.Util.forEach(capacityListEl, function (item) {
+    window.util.forEach(capacityListEl, function (item) {
       item.selected = (item.disabled) ? false : true;
     });
   };
