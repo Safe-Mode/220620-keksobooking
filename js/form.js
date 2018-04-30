@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var MIN_PRICES = {
+  var minPriceMap = {
     bungalo: 0,
     flat: 1000,
     house: 5000,
@@ -16,13 +16,20 @@
   var capacityEl = document.querySelector('#capacity');
   var capacityListEl = capacityEl.children;
 
+  var setPriceToType = function () {
+    housingPriceEl.min = minPriceMap[housingTypeEl.value];
+    housingPriceEl.placeholder = minPriceMap[housingTypeEl.value];
+  };
+
   var onTimeInChange = function () {
     timeOutEl.value = timeInEl.value;
   };
 
-  housingPriceEl.min = MIN_PRICES[housingTypeEl.value];
-  housingPriceEl.placeholder = MIN_PRICES[housingTypeEl.value];
+  var onTypeChange = function () {
+    setPriceToType();
+  };
 
+  setPriceToType();
   timeInEl.addEventListener('change', onTimeInChange);
 
   var setActiveOptions = function () {
@@ -63,5 +70,6 @@
   };
 
   setOptionsState();
+  housingTypeEl.addEventListener('change', onTypeChange);
   roomNumEl.addEventListener('change', onRoomNumChange);
 })();

@@ -175,11 +175,11 @@
   var activateForm = function () {
     if (formEl.classList.contains('ad-form--disabled')) {
       formEl.classList.remove('ad-form--disabled');
-    }
 
-    formFieldsEl.forEach(function (field) {
-      field.disabled = false;
-    });
+      formFieldsEl.forEach(function (field) {
+        field.disabled = false;
+      });
+    }
   };
 
   var getPinCoords = function (pin) {
@@ -227,7 +227,7 @@
       });
       activateForm();
       mainPinEl.removeEventListener('mouseup', onMainPinMouseUp);
-      document.addEventListener('mouseup', onMainPinMouseUp);
+      document.removeEventListener('mouseup', onMainPinMouseUp);
     };
 
     document.addEventListener('mouseup', onMainPinMouseUp);
@@ -301,7 +301,7 @@
     var messageNode = document.createElement('div');
 
     messageNode.id = 'error';
-    messageNode.style.position = 'absolute';
+    messageNode.style.position = 'fixed';
     messageNode.style.zIndex = '100';
     messageNode.style.left = 0;
     messageNode.style.right = 0;
@@ -369,21 +369,54 @@
 
   var successModalEl = document.querySelector('.success');
 
+  var disableMap = function () {
+    if (!mapEl.classList.contains('map--faded')) {
+      mapEl.classList.add('map--faded');
+
+      var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+      mapPinsEl.forEach(function (pin) {
+        window.util.removeElement(pin);
+      });
+    }
+  };
+
+  var disableForm = function () {
+    formEl.classList.add('ad-form--disabled');
+
+    formFieldsEl.forEach(function (field) {
+      field.disabled = true;
+    });
+  };
+
+  var setInitAppState = function () {
+    formEl.reset();
+    setInitCoords(mainPinEl, mainPinInitCoord);
+    fillAdress();
+    disableForm();
+    disableMap();
+  };
+
   formEl.addEventListener('submit', function (evt) {
     var onSubmitSuccess = function () {
+      setInitAppState();
       showSubmitMessage(successModalEl, MESSAGE_TIMEOUT);
-      evt.target.reset();
-      setInitCoords(mainPinEl, mainPinInitCoord);
-      fillAdress();
     };
 
     window.backend.save({
       url: ENDPOINT_URL,
-      data: new FormData(evt.currentTarget),
+      data: new FormData(evt.target),
       onLoad: onSubmitSuccess,
       onError: onXHRError
     });
 
     evt.preventDefault();
+  });
+
+  var formResetEl = document.querySelector('.ad-form__reset');
+
+  formResetEl.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    setInitAppState();
   });
 })();
