@@ -3,58 +3,19 @@
 (function () {
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
   var PRICE_DIMENSION = '₽/ночь';
-  var TYPES = {
+  var MAIN_PIN_LINK_HEIGHT = 22;
+  var MESSAGE_TIMEOUT = 5000;
+
+  var loadURL = ENDPOINT_URL + '/data';
+  var typesMap = {
     'flat': 'Квартира',
     'bungalo': 'Бунгало',
     'house': 'Дом',
     'palace': 'Дворец'
   };
-  var MAIN_PIN_LINK_HEIGHT = 22;
-  var MESSAGE_TIMEOUT = 5000;
-
-  var loadURL = ENDPOINT_URL + '/data';
   var mapEl = document.querySelector('.map');
-
-  var getPins = function (data) {
-    var pins = [];
-
-    data.forEach(function (item) {
-      var pin = new window.Pin(item);
-      pins.push(pin);
-    });
-
-    return pins;
-  };
-
-  var renderPin = function (data, template) {
-    var pinEl = template.cloneNode(true);
-    var pinImgEl = pinEl.querySelector('img');
-    var pinWidth = pinImgEl.width;
-    var pinHeight = pinImgEl.height;
-
-    pinImgEl.src = data.src;
-    pinImgEl.alt = data.alt;
-    pinEl.style.left = data.location.x + pinWidth / 2 + 'px';
-    pinEl.style.top = data.location.y + pinHeight + 'px';
-
-    return pinEl;
-  };
-
-  var appendElements = function (settings) {
-    var fragment = document.createDocumentFragment();
-
-    settings.data.forEach(function (item) {
-      fragment.appendChild(settings.renderFunc(item, settings.template));
-    });
-
-    settings.container.appendChild(fragment);
-  };
-
-  var pinTemplateEl = document.querySelector('template')
-      .content
-      .querySelector('.map__pin');
   var pinsContainerEl = document.querySelector('.map__pins');
-  var pins = null;
+  var advertsData;
 
   var getAdverts = function (data) {
     var adverts = [];
@@ -81,7 +42,7 @@
     advertEl.querySelector('.popup__title').textContent = data.offer.title;
     advertEl.querySelector('.popup__text--address').textContent = data.offer.address;
     advertEl.querySelector('.popup__text--price').textContent = data.offer.price + ' ' + PRICE_DIMENSION;
-    advertEl.querySelector('.popup__type').textContent = TYPES[data.offer.type];
+    advertEl.querySelector('.popup__type').textContent = typesMap[data.offer.type];
     advertEl.querySelector('.popup__text--capacity').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
     advertEl.querySelector('.popup__text--time').textContent = 'Заезд после ' + data.offer.checkin + ' выезд до ' + data.offer.checkout;
 
@@ -174,26 +135,16 @@
     addressInputEl.value = getPinCoords(mainPinEl).x + ', ' + getPinCoords(mainPinEl).y;
   };
 
-  var activateMap = function (options) {
+  var activateMap = function (data) {
     if (mapEl.classList.contains('map--faded')) {
+      window.renderPins(data);
       mapEl.classList.remove('map--faded');
-      appendElements({
-        data: options.pins,
-        template: options.template,
-        container: options.container,
-        renderFunc: options.renderFunc
-      });
     }
   };
 
   var onMainPinMouseDown = function () {
     var onMainPinMouseUp = function () {
-      activateMap({
-        pins: pins,
-        template: pinTemplateEl,
-        container: pinsContainerEl,
-        renderFunc: renderPin
-      });
+      activateMap(advertsData);
       activateForm();
       mainPinEl.removeEventListener('mouseup', onMainPinMouseUp);
       document.removeEventListener('mouseup', onMainPinMouseUp);
@@ -202,9 +153,11 @@
     document.addEventListener('mouseup', onMainPinMouseUp);
   };
 
-  var removeCard = function (card) {
-    if (card) {
-      window.util.removeElement(card);
+  var removeCard = function () {
+    var advertCardEl = mapEl.querySelector('.map__card');
+
+    if (advertCardEl) {
+      window.util.removeElement(advertCardEl);
     }
   };
 
@@ -224,19 +177,16 @@
 
   var onMapPinClick = function (evt) {
     if (evt.target.parentElement.classList.contains('map__pin') && !evt.target.parentElement.classList.contains('map__pin--main')) {
-      var advertCardEl = mapEl.querySelector('.map__card');
-
-      removeCard(advertCardEl);
+      removeCard();
       showAdvertCard(evt.target.parentElement);
 
-      advertCardEl = mapEl.querySelector('.map__card');
       var popupCloseEl = mapEl.querySelector('.popup__close');
 
       var onCardEscPress = function (escEvt) {
         escEvt.preventDefault();
 
         if (window.util.isEscPressed(escEvt)) {
-          toggleModal(advertCardEl);
+          removeCard();
           document.removeEventListener('keydown', onCardEscPress);
         }
       };
@@ -244,7 +194,7 @@
       var onPopupCloseClick = function (closeEvt) {
         closeEvt.preventDefault();
 
-        removeCard(advertCardEl);
+        removeCard();
         document.removeEventListener('keydown', onCardEscPress);
       };
 
@@ -316,7 +266,7 @@
   };
 
   var onXHRSuccess = function (data) {
-    pins = getPins(data);
+    advertsData = data;
     adverts = getAdverts(data);
 
     mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
@@ -340,6 +290,7 @@
 
   var disableMap = function () {
     if (!mapEl.classList.contains('map--faded')) {
+      removeCard();
       mapEl.classList.add('map--faded');
 
       var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
