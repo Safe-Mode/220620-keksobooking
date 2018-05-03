@@ -31,13 +31,20 @@
     return pinEl;
   };
 
-  var appendElements = function (data) {
+  var appendElements = function (data, count) {
     var fragment = document.createDocumentFragment();
     var pins = getPins(data);
+    var cardEl = document.querySelector('.map__card');
 
-    pins.forEach(function (pin) {
-      fragment.appendChild(renderPin(pin));
-    });
+    count = (count > data.length) ? data.length : count;
+
+    for (var i = 0; i < count; i++) {
+      fragment.appendChild(renderPin(pins[i]));
+    }
+
+    if (cardEl) {
+      window.util.removeElement(cardEl);
+    }
 
     window.util.drainContainer(pinsContainerEl, '.map__pin:not(.map__pin--main)');
     pinsContainerEl.appendChild(fragment);

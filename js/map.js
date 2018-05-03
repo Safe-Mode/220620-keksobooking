@@ -4,6 +4,7 @@
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
   var MAIN_PIN_LINK_HEIGHT = 22;
   var MESSAGE_TIMEOUT = 5000;
+  var PINS_COUNT = 5;
 
   var loadURL = ENDPOINT_URL + '/data';
 
@@ -75,7 +76,7 @@
 
   var activateMap = function (data) {
     if (mapEl.classList.contains('map--faded')) {
-      window.renderPins(window.filter(data));
+      window.renderPins(window.filter(data), PINS_COUNT);
       mapEl.classList.remove('map--faded');
     }
   };
@@ -281,6 +282,6 @@
   var filtersEl = document.querySelector('.map__filters');
 
   filtersEl.addEventListener('change', function () {
-    window.renderPins(window.filter(advertsData));
+    window.renderPins(window.filter(advertsData), PINS_COUNT);
   });
 })();
