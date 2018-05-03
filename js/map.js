@@ -281,7 +281,11 @@
 
   var filtersEl = document.querySelector('.map__filters');
 
-  filtersEl.addEventListener('change', function () {
+  var updatePins = function () {
     window.renderPins(window.filter(advertsData), PINS_COUNT);
+  };
+
+  filtersEl.addEventListener('change', function () {
+    window.debounce(updatePins);
   });
 })();
