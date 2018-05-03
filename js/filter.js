@@ -16,7 +16,7 @@
     }
   };
 
-  var filtersEl = document.querySelectorAll('.map__filter');
+  var filtersEl = document.querySelector('.map__filters').children;
 
   var filterCbMap = {
     'housing-type': function (data, filter) {
@@ -28,26 +28,30 @@
     },
 
     'housing-rooms': function (data, filter) {
-      return true;
+      return filter.value === data.offer.rooms.toString();
     },
 
     'housing-guests': function (data, filter) {
-      return true;
+      return filter.value === data.offer.guests.toString();
     },
 
     'housing-features': function (data, filter) {
-      return true;
+      var checkListEl = filter.querySelectorAll('input[type=checkbox]:checked');
+
+      return [].every.call(checkListEl, function (it) {
+        return data.offer.features.some(function (feature) {
+          return feature === it.value;
+        });
+      });
     }
   };
 
-  var filterCb = function (it) {
-    return [].every.call(filtersEl, function (filter) {
-      return (filter.value === 'any') ? true : filterCbMap[filter.name](it, filter);
-    });
-  };
-
   var filterData = function (data) {
-    return data.filter(filterCb);
+    return data.filter(function (it) {
+      return [].every.call(filtersEl, function (filter) {
+        return (filter.value === 'any') ? true : filterCbMap[filter.id](it, filter);
+      });
+    });
   };
 
   window.filter = filterData;
