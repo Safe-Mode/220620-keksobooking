@@ -39,6 +39,7 @@
       fragment.appendChild(renderPin(pin));
     });
 
+    window.util.drainContainer(pinsContainerEl, '.map__pin:not(.map__pin--main)');
     pinsContainerEl.appendChild(fragment);
   };
 

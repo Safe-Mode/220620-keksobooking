@@ -2,88 +2,26 @@
 
 (function () {
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
-  var PRICE_DIMENSION = '₽/ночь';
   var MAIN_PIN_LINK_HEIGHT = 22;
   var MESSAGE_TIMEOUT = 5000;
 
   var loadURL = ENDPOINT_URL + '/data';
-  var typesMap = {
-    'flat': 'Квартира',
-    'bungalo': 'Бунгало',
-    'house': 'Дом',
-    'palace': 'Дворец'
-  };
+
   var mapEl = document.querySelector('.map');
   var pinsContainerEl = document.querySelector('.map__pins');
   var advertsData;
 
-  var getAdverts = function (data) {
-    var adverts = [];
+  var getCards = function (data) {
+    var cards = [];
 
     data.forEach(function (item) {
       var advert = new window.Card(item);
-      adverts.push(advert);
+      cards.push(advert);
     });
 
-    return adverts;
+    return cards;
   };
 
-  var clearContainer = function (container) {
-    var children = container.querySelectorAll('*');
-
-    for (var i = 0; i < children.length; i++) {
-      container.removeChild(children[i]);
-    }
-  };
-
-  var renderAdvert = function (data, template) {
-    var advertEl = template.cloneNode(true);
-
-    advertEl.querySelector('.popup__title').textContent = data.offer.title;
-    advertEl.querySelector('.popup__text--address').textContent = data.offer.address;
-    advertEl.querySelector('.popup__text--price').textContent = data.offer.price + ' ' + PRICE_DIMENSION;
-    advertEl.querySelector('.popup__type').textContent = typesMap[data.offer.type];
-    advertEl.querySelector('.popup__text--capacity').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
-    advertEl.querySelector('.popup__text--time').textContent = 'Заезд после ' + data.offer.checkin + ' выезд до ' + data.offer.checkout;
-
-    var features = data.offer.features;
-    var featuresContainerEl = advertEl.querySelector('.popup__features');
-    var fragment = document.createDocumentFragment();
-
-    features.forEach(function (feature) {
-      var featureEl = document.createElement('li');
-
-      featureEl.classList.add('popup__feature');
-      featureEl.classList.add('popup__feature--' + feature);
-      fragment.appendChild(featureEl);
-    });
-
-    clearContainer(featuresContainerEl);
-    featuresContainerEl.appendChild(fragment);
-    advertEl.querySelector('.popup__description').textContent = data.offer.description;
-    advertEl.querySelector('.popup__avatar').src = data.author.avatar;
-
-    var photoContainerEl = advertEl.querySelector('.popup__photos');
-    var widthPhoto = photoContainerEl.querySelector('.popup__photo').width;
-    var heightPhoto = photoContainerEl.querySelector('.popup__photo').height;
-
-    data.offer.photos.forEach(function (item, i) {
-      if (i > 0) {
-        var newImg = document.createElement('img');
-
-        newImg.classList.add('popup__photo');
-        newImg.width = widthPhoto;
-        newImg.height = heightPhoto;
-        photoContainerEl.appendChild(newImg);
-      }
-
-      photoContainerEl.querySelectorAll('.popup__photo')[i].src = item;
-    });
-
-    return advertEl;
-  };
-
-  var adverts = null;
   var advertTemplateEl = document.querySelector('template')
       .content
       .querySelector('.map__card');
@@ -137,7 +75,7 @@
 
   var activateMap = function (data) {
     if (mapEl.classList.contains('map--faded')) {
-      window.renderPins(data);
+      window.renderPins(window.filter(data));
       mapEl.classList.remove('map--faded');
     }
   };
@@ -161,12 +99,13 @@
     }
   };
 
-  var showAdvertCard = function (evtPin) {
+  var showCard = function (evtPin) {
     var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+    var cards = getCards(window.filter(advertsData));
 
     mapPinsEl.forEach(function (pin, i) {
       if (pin === evtPin) {
-        mapEl.insertBefore(renderAdvert(adverts[i], advertTemplateEl), filterContainerEl);
+        mapEl.insertBefore(window.renderCard(cards[i], advertTemplateEl), filterContainerEl);
       }
     });
   };
@@ -178,7 +117,7 @@
   var onMapPinClick = function (evt) {
     if (evt.target.parentElement.classList.contains('map__pin') && !evt.target.parentElement.classList.contains('map__pin--main')) {
       removeCard();
-      showAdvertCard(evt.target.parentElement);
+      showCard(evt.target.parentElement);
 
       var popupCloseEl = mapEl.querySelector('.popup__close');
 
@@ -267,7 +206,6 @@
 
   var onXHRSuccess = function (data) {
     advertsData = data;
-    adverts = getAdverts(data);
 
     mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
     pinsContainerEl.addEventListener('click', onMapPinClick);
@@ -338,5 +276,11 @@
   formResetEl.addEventListener('click', function (evt) {
     evt.preventDefault();
     setInitAppState();
+  });
+
+  var filtersEl = document.querySelector('.map__filters');
+
+  filtersEl.addEventListener('change', function () {
+    window.renderPins(window.filter(advertsData));
   });
 })();
