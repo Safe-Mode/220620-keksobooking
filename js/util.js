@@ -9,6 +9,14 @@
       ENTER: 13
     },
 
+    isEscPressed: function (evt) {
+      return evt.keyCode === this.Keycode.ESC;
+    },
+
+    isEnterPressed: function (evt) {
+      return evt.keyCode === this.Keycode.ENTER;
+    },
+
     getRandomInt: function (min, max) {
       var rand = min + Math.random() * (max + 1 - min);
       rand = Math.floor(rand);
@@ -36,12 +44,13 @@
       el.parentElement.removeChild(el);
     },
 
-    isEscPressed: function (evt) {
-      return evt.keyCode === this.Keycode.ESC;
-    },
+    drainContainer: function (container, selector) {
+      var collection = (selector) ? container.querySelectorAll(selector) : container.querySelectorAll('*');
+      var that = this;
 
-    isEnterPressed: function (evt) {
-      return evt.keyCode === this.Keycode.ENTER;
+      this.forEach(collection, function (it) {
+        that.removeElement(it);
+      });
     },
 
     forEach: function (collection, cb) {
