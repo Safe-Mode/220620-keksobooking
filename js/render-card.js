@@ -20,39 +20,50 @@
     cardEl.querySelector('.popup__text--capacity').textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
     cardEl.querySelector('.popup__text--time').textContent = 'Заезд после ' + data.offer.checkin + ' выезд до ' + data.offer.checkout;
 
-    var features = data.offer.features;
+    var features = (data.offer.features.length) ? data.offer.features : null;
     var featuresContainerEl = cardEl.querySelector('.popup__features');
     var fragment = document.createDocumentFragment();
 
-    features.forEach(function (feature) {
-      var featureEl = document.createElement('li');
+    if (features) {
+      features.forEach(function (feature) {
+        var featureEl = document.createElement('li');
 
-      featureEl.classList.add('popup__feature');
-      featureEl.classList.add('popup__feature--' + feature);
-      fragment.appendChild(featureEl);
-    });
+        featureEl.classList.add('popup__feature');
+        featureEl.classList.add('popup__feature--' + feature);
+        fragment.appendChild(featureEl);
+      });
 
-    window.util.drainContainer(featuresContainerEl);
-    featuresContainerEl.appendChild(fragment);
+      window.util.drainContainer(featuresContainerEl);
+      featuresContainerEl.appendChild(fragment);
+    } else {
+      window.util.removeElement(featuresContainerEl);
+    }
+
     cardEl.querySelector('.popup__description').textContent = data.offer.description;
     cardEl.querySelector('.popup__avatar').src = data.author.avatar;
 
+    var photos = (data.offer.photos.length) ? data.offer.photos : null;
     var photoContainerEl = cardEl.querySelector('.popup__photos');
-    var widthPhoto = photoContainerEl.querySelector('.popup__photo').width;
-    var heightPhoto = photoContainerEl.querySelector('.popup__photo').height;
 
-    data.offer.photos.forEach(function (item, i) {
-      if (i > 0) {
-        var newImg = document.createElement('img');
+    if (photos) {
+      var widthPhoto = photoContainerEl.querySelector('.popup__photo').width;
+      var heightPhoto = photoContainerEl.querySelector('.popup__photo').height;
 
-        newImg.classList.add('popup__photo');
-        newImg.width = widthPhoto;
-        newImg.height = heightPhoto;
-        photoContainerEl.appendChild(newImg);
-      }
+      data.offer.photos.forEach(function (item, i) {
+        if (i > 0) {
+          var newImg = document.createElement('img');
 
-      photoContainerEl.querySelectorAll('.popup__photo')[i].src = item;
-    });
+          newImg.classList.add('popup__photo');
+          newImg.width = widthPhoto;
+          newImg.height = heightPhoto;
+          photoContainerEl.appendChild(newImg);
+        }
+
+        photoContainerEl.querySelectorAll('.popup__photo')[i].src = item;
+      });
+    } else {
+      window.util.removeElement(photoContainerEl);
+    }
 
     return cardEl;
   };

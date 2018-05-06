@@ -48,13 +48,9 @@
       var collection = (selector) ? container.querySelectorAll(selector) : container.querySelectorAll('*');
       var that = this;
 
-      this.forEach(collection, function (it) {
+      [].forEach.call(collection, function (it) {
         that.removeElement(it);
       });
-    },
-
-    forEach: function (collection, cb) {
-      [].forEach.call(collection, cb);
     }
   };
 })();

@@ -23,8 +23,12 @@
     housingPriceEl.placeholder = minPriceMap[housingTypeEl.value];
   };
 
-  var onTimeInChange = function () {
-    timeOutEl.value = timeInEl.value;
+  var onTimeChange = function (evt) {
+    if (evt.target === timeInEl) {
+      timeOutEl.value = timeInEl.value;
+    } else {
+      timeInEl.value = timeOutEl.value;
+    }
   };
 
   var onTypeChange = function () {
@@ -32,21 +36,22 @@
   };
 
   setPriceToType();
-  timeInEl.addEventListener('change', onTimeInChange);
+  timeInEl.addEventListener('change', onTimeChange);
+  timeOutEl.addEventListener('change', onTimeChange);
 
   var setActiveOptions = function () {
     if (roomNumEl.value !== '100') {
-      window.util.forEach(capacityListEl, function (item) {
+      [].forEach.call(capacityListEl, function (item) {
         item.disabled = (roomNumEl.value >= item.value) ? false : true;
       });
 
-      window.util.forEach(capacityListEl, function (item) {
+      [].forEach.call(capacityListEl, function (item) {
         if (item.value === '0') {
           item.disabled = true;
         }
       });
     } else {
-      window.util.forEach(capacityListEl, function (item) {
+      [].forEach.call(capacityListEl, function (item) {
         if (item.value === '0') {
           item.disabled = false;
         } else {
@@ -57,7 +62,7 @@
   };
 
   var setSelectedOption = function () {
-    window.util.forEach(capacityListEl, function (item) {
+    [].forEach.call(capacityListEl, function (item) {
       item.defaultSelected = (item.disabled) ? false : true;
     });
   };

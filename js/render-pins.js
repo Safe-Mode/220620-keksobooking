@@ -20,8 +20,8 @@
   var renderPin = function (data) {
     var pinEl = pinTemplateEl.cloneNode(true);
     var pinImgEl = pinEl.querySelector('img');
-    var pinWidth = pinImgEl.width;
-    var pinHeight = pinImgEl.height;
+    var pinWidth = pinEl.offsetWidth;
+    var pinHeight = pinEl.offsetHeight;
 
     pinImgEl.src = data.src;
     pinImgEl.alt = data.alt;

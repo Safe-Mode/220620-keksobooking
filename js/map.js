@@ -2,12 +2,11 @@
 
 (function () {
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
-  var MAIN_PIN_LINK_HEIGHT = 22;
+  var MAIN_PIN_LINK_HEIGHT = 20;
   var MESSAGE_TIMEOUT = 5000;
   var PINS_COUNT = 5;
 
   var loadURL = ENDPOINT_URL + '/data';
-
   var mapEl = document.querySelector('.map');
   var pinsContainerEl = document.querySelector('.map__pins');
   var advertsData;

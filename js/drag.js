@@ -2,8 +2,16 @@
 
 (function () {
   var STYLE_DIMENSION = 'px';
+  var MAIN_PIN_LINK_HEIGHT = 20;
+
+  var EdgeCoord = {
+    TOP: 150,
+    BOTTOM: 500
+  };
 
   window.drag = function (el, container, cb) {
+    var pinImgEl = el.querySelector('img');
+
     el.addEventListener('mousedown', function (evt) {
       evt.preventDefault();
 
@@ -28,13 +36,13 @@
         var leftPos = target.offsetLeft - shift.x;
         var topPos = target.offsetTop - shift.y;
         var rightEdge = container.offsetWidth;
-        var bottomEdge = container.offsetHeight;
+        var bottomEdge = (container.offsetHeight <= EdgeCoord.BOTTOM) ? container.offsetHeight : EdgeCoord.BOTTOM;
         var pinWidth = el.offsetWidth;
-        var pinHeight = el.offsetHeight;
+        var pinHeight = pinImgEl.offsetHeight + MAIN_PIN_LINK_HEIGHT;
 
         leftPos = (leftPos < 0) ? 0 : leftPos;
         leftPos = (leftPos + pinWidth > rightEdge) ? rightEdge - pinWidth : leftPos;
-        topPos = (topPos < 0) ? 0 : topPos;
+        topPos = (topPos < EdgeCoord.TOP) ? EdgeCoord.TOP : topPos;
         topPos = (topPos + pinHeight > bottomEdge) ? bottomEdge - pinHeight : topPos;
 
         target.style.left = leftPos + STYLE_DIMENSION;
