@@ -148,4 +148,6 @@
       initColor: initColor
     });
   });
+
+  window.sort(photoBoxEl);
 })();
