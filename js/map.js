@@ -2,13 +2,14 @@
 
 (function () {
   var ENDPOINT_URL = 'https://js.dump.academy/keksobooking';
-  var MAIN_PIN_LINK_HEIGHT = 20;
+  var MAIN_PIN_LINK_HEIGHT = 22;
   var MESSAGE_TIMEOUT = 5000;
   var PINS_COUNT = 5;
 
   var loadURL = ENDPOINT_URL + '/data';
   var mapEl = document.querySelector('.map');
   var pinsContainerEl = document.querySelector('.map__pins');
+  var mapPinsEl;
   var advertsData;
 
   var getCards = function (data) {
@@ -54,17 +55,17 @@
     var leftPos = parseInt(pin.style.left, window.util.RADIX_TEN);
     var topPos = parseInt(pin.style.top, window.util.RADIX_TEN);
     var width = parseInt(getComputedStyle(pin).width, window.util.RADIX_TEN);
-    var height = parseInt(getComputedStyle(pin).height, window.util.RADIX_TEN);
+    var height = pin.querySelector('img').offsetHeight;
 
     if (mapEl.classList.contains('map--faded')) {
       return {
-        x: leftPos + width / 2,
-        y: topPos + height / 2
+        x: Math.round(leftPos + width / 2),
+        y: Math.round(topPos + height / 2)
       };
     } else {
       return {
-        x: leftPos + width / 2,
-        y: topPos + height + MAIN_PIN_LINK_HEIGHT
+        x: Math.round(leftPos + width / 2),
+        y: Math.round(topPos + height + MAIN_PIN_LINK_HEIGHT)
       };
     }
   };
@@ -82,10 +83,15 @@
 
   var onMainPinMouseDown = function () {
     var onMainPinMouseUp = function () {
-      activateMap(advertsData);
+      window.backend.load({
+        url: loadURL,
+        onLoad: onXHRSuccess,
+        onError: onXHRError
+      });
+
       activateForm();
-      mainPinEl.removeEventListener('mouseup', onMainPinMouseUp);
       document.removeEventListener('mouseup', onMainPinMouseUp);
+      mainPinEl.removeEventListener('mousedown', onMainPinMouseDown);
     };
 
     document.addEventListener('mouseup', onMainPinMouseUp);
@@ -100,8 +106,9 @@
   };
 
   var showCard = function (evtPin) {
-    var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
     var cards = getCards(window.filter(advertsData));
+
+    mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
 
     mapPinsEl.forEach(function (pin, i) {
       if (pin === evtPin) {
@@ -115,9 +122,19 @@
   };
 
   var onMapPinClick = function (evt) {
+    var target;
+
+    if (evt.target.classList.contains('map__pin') && !evt.target.classList.contains('map__pin--main')) {
+      target = evt.target;
+    }
+
     if (evt.target.parentElement.classList.contains('map__pin') && !evt.target.parentElement.classList.contains('map__pin--main')) {
+      target = evt.target.parentElement;
+    }
+
+    if (target) {
       removeCard();
-      showCard(evt.target.parentElement);
+      showCard(target);
 
       var popupCloseEl = mapEl.querySelector('.popup__close');
 
@@ -206,20 +223,13 @@
 
   var onXHRSuccess = function (data) {
     advertsData = data;
-
-    mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
+    activateMap(data);
     pinsContainerEl.addEventListener('click', onMapPinClick);
   };
 
   var onXHRError = function (errorMessage) {
     showErrorMessage(errorMessage, MESSAGE_TIMEOUT);
   };
-
-  window.backend.load({
-    url: loadURL,
-    onLoad: onXHRSuccess,
-    onError: onXHRError
-  });
 
   fillAdress();
   window.drag(mainPinEl, pinsContainerEl, fillAdress);
@@ -230,8 +240,7 @@
     if (!mapEl.classList.contains('map--faded')) {
       removeCard();
       mapEl.classList.add('map--faded');
-
-      var mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+      mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
 
       mapPinsEl.forEach(function (pin) {
         window.util.removeElement(pin);
@@ -255,10 +264,13 @@
     disableMap();
   };
 
+  mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
+
   formEl.addEventListener('submit', function (evt) {
     var onSubmitSuccess = function () {
       setInitAppState();
       showSubmitMessage(successModalEl, MESSAGE_TIMEOUT);
+      mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
     };
 
     window.backend.save({
@@ -276,6 +288,7 @@
   formResetEl.addEventListener('click', function (evt) {
     evt.preventDefault();
     setInitAppState();
+    mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
   });
 
   var filtersEl = document.querySelector('.map__filters');

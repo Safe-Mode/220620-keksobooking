@@ -2,7 +2,7 @@
 
 (function () {
   var STYLE_DIMENSION = 'px';
-  var MAIN_PIN_LINK_HEIGHT = 20;
+  var MAIN_PIN_LINK_HEIGHT = 22;
 
   var EdgeCoord = {
     TOP: 150,
@@ -42,7 +42,7 @@
 
         leftPos = (leftPos < 0) ? 0 : leftPos;
         leftPos = (leftPos + pinWidth > rightEdge) ? rightEdge - pinWidth : leftPos;
-        topPos = (topPos < EdgeCoord.TOP) ? EdgeCoord.TOP : topPos;
+        topPos = (topPos < EdgeCoord.TOP - pinHeight) ? EdgeCoord.TOP - pinHeight : topPos;
         topPos = (topPos + pinHeight > bottomEdge) ? bottomEdge - pinHeight : topPos;
 
         target.style.left = leftPos + STYLE_DIMENSION;
