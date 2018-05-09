@@ -76,14 +76,10 @@
   housingTypeEl.addEventListener('change', onTypeChange);
   roomNumEl.addEventListener('change', onRoomNumChange);
 
-  formEl.addEventListener('submit', function () {
-    setOptionsState();
+  var resetValues = function () {
     setPriceToType();
-  });
+    setOptionsState();
+  };
 
-  formResetEl.addEventListener('click', function (evt) {
-    evt.preventDefault();
-    setPriceToType();
-    setOptionsState();
-  });
+  window.form = resetValues;
 })();

@@ -8,7 +8,7 @@
 
   var loadURL = ENDPOINT_URL + '/data';
   var mapEl = document.querySelector('.map');
-  var pinsContainerEl = document.querySelector('.map__pins');
+  var pinsContainerEl = mapEl.querySelector('.map__pins');
   var mapPinsEl;
   var advertsData;
 
@@ -29,7 +29,7 @@
   var filterContainerEl = document.querySelector('.map__filters-container');
   var formEl = document.querySelector('.ad-form');
   var formFieldsEl = formEl.querySelectorAll('fieldset');
-  var mainPinEl = document.querySelector('.map__pin--main');
+  var mainPinEl = mapEl.querySelector('.map__pin--main');
   var addressInputEl = formEl.querySelector('#address');
 
   var mainPinInitCoord = {
@@ -266,9 +266,10 @@
 
   var setInitAppState = function () {
     setInitCoords(mainPinEl, mainPinInitCoord);
-    fillAdress();
     disableForm();
     disableMap();
+    fillAdress();
+    window.form();
   };
 
   mainPinEl.addEventListener('mousedown', onMainPinMouseDown);
