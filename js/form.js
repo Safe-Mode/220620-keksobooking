@@ -9,7 +9,6 @@
   };
 
   var formEl = document.querySelector('.ad-form');
-  var formResetEl = formEl.querySelector('.ad-form__reset');
   var housingTypeEl = formEl.querySelector('#type');
   var housingPriceEl = formEl.querySelector('#price');
   var timeInEl = formEl.querySelector('#timein');
