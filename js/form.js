@@ -52,11 +52,7 @@
       });
     } else {
       [].forEach.call(capacityListEl, function (item) {
-        if (item.value === '0') {
-          item.disabled = false;
-        } else {
-          item.disabled = true;
-        }
+        item.disabled = (item.value === '0') ? false : true;
       });
     }
   };
@@ -80,13 +76,14 @@
   housingTypeEl.addEventListener('change', onTypeChange);
   roomNumEl.addEventListener('change', onRoomNumChange);
 
-  formEl.addEventListener('submit', function (evt) {
+  formEl.addEventListener('submit', function () {
     setOptionsState();
-    evt.preventDefault();
+    setPriceToType();
   });
 
   formResetEl.addEventListener('click', function (evt) {
     evt.preventDefault();
+    setPriceToType();
     setOptionsState();
   });
 })();

@@ -31,6 +31,7 @@
   var formFieldsEl = formEl.querySelectorAll('fieldset');
   var mainPinEl = document.querySelector('.map__pin--main');
   var addressInputEl = formEl.querySelector('#address');
+
   var mainPinInitCoord = {
     x: mainPinEl.style.left,
     y: mainPinEl.style.top
@@ -235,11 +236,15 @@
   window.drag(mainPinEl, pinsContainerEl, fillAdress);
 
   var successModalEl = document.querySelector('.success');
+  var avatarEl = document.querySelector('.ad-form-header__preview img');
+  var avatarInitSrc = avatarEl.src;
+  var photoContainerEl = document.querySelector('.ad-form__photo');
 
   var disableMap = function () {
     if (!mapEl.classList.contains('map--faded')) {
       removeCard();
       mapEl.classList.add('map--faded');
+      filtersEl.reset();
       mapPinsEl = document.querySelectorAll('.map__pin:not(.map__pin--main)');
 
       mapPinsEl.forEach(function (pin) {
@@ -249,7 +254,10 @@
   };
 
   var disableForm = function () {
+    formEl.reset();
     formEl.classList.add('ad-form--disabled');
+    avatarEl.src = avatarInitSrc;
+    window.util.drainContainer(photoContainerEl);
 
     formFieldsEl.forEach(function (field) {
       field.disabled = true;
@@ -257,7 +265,6 @@
   };
 
   var setInitAppState = function () {
-    formEl.reset();
     setInitCoords(mainPinEl, mainPinInitCoord);
     fillAdress();
     disableForm();
